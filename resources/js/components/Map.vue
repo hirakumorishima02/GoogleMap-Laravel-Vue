@@ -1,5 +1,6 @@
 <template>
     <div>
+        <router-link :to="{ name: 'detail', params: { id: 1 } }" class="mx-auto btn btn-success">More Info</router-link>
         <GmapAutocomplete
           @place_changed="setPlace">
         </GmapAutocomplete>
