@@ -25,6 +25,7 @@
         "vue-template-compiler": "^2.6.10"
     },
     "dependencies": {
-        "google-maps": "^3.3.0"
+        "google-maps": "^3.3.0",
+        "vue2-google-maps": "^0.10.7"
     }
 }

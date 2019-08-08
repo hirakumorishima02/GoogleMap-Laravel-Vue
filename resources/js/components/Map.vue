@@ -1,131 +1,145 @@
 <template>
-    <div id="map" :style='{width: mapWidth + "px" , height: mapHeight + "px"}' />
+    <div>
+        <GmapAutocomplete
+          @place_changed="setPlace">
+        </GmapAutocomplete>
+        <!--<input type='text' v-model='name' placeholder='地名'>-->
+        
+        <button @click="addMarker">Add</button>
+      <br/>
+        <GmapMap
+          :center="{lat:10, lng:10}"
+          :zoom="1"
+          map-type-id="terrain"
+          style="width:100%;  height: 400px;"
+        >
+            <GmapMarker
+                :key="index"
+                v-for="(marker, index) in destinations"
+                :position="marker.position"
+                :clickable="true"
+                @click="toggleInfoWindow(marker, marker.id)"
+            />
+            <gmap-info-window
+                :options="infoOptions"
+                :position="infoWindowPos"
+                :opened="infoWinOpen"
+                @closeclick="infoWinOpen=false"
+            >
+                <div v-html="infoContent"></div>
+            </gmap-info-window>
+        </GmapMap>
+    </div>
 </template>
 
 <script>
-let GoogleMapsLoader = require('google-maps');
-
-GoogleMapsLoader.KEY = 'AIzaSyCYDBKZ0Hp66gi6wllOzGoE8oVuMUaxUD0';
-GoogleMapsLoader.LANGAGE = 'ja';
-
 export default{
-    name: 'Gmap',
-    props: {
-        propsWidth: {
-          type: Number
-        },
-        propsHeight: {
-          type: Number
-        },
-        lat: {
-          type: Number,
-          default: 34.722677
-        },
-        lng: {
-          type: Number,
-          default: 135.492364
-        },
-        zoom: {
-          type: Number,
-          default: 8
-        },
-        markers: {
-          type: Array,
-          default: () => {
-            return [];
-          }
-        }
-    },
     data: function() {
         return {
-            destinations: null,
-            map: null,
-            mapWidth: this.propsWidth,
-            mapHeight: this.propsHeight,
-            formattedMarkers: []
-        }
-    },
-    created: function() {
-        this.mapWidth = window.innerWidth;
-        this.mapHeight = window.innerHeight;
-    },
-    watch: {
-        markers() {
-          // マーカーを全削除
-          this.formattedMarkers.forEach(marker => {
-            marker.setMap(null);
-          });
-          // propsからも削除
-          this.formattedMarkers.splice(0, this.formattedMarkers.length);
-    
-          // 再描画
-          this.addMarker();
+            // getDestinations関係
+            center: { lat: 45.508, lng: -73.587 },
+            destinations:  [],
+            places: [],
+            currentPlace: null,
+            
+            // addMarker関係
+            name: '',
+            photo:'',
+            
+            // infoWindow
+            infoContent: '',
+            infoWindowPos: {
+                lat: 0,
+                lng: 0
+            },
+            infoWinOpen: false,
+            currentMidx: null,
+            //optional: offset infowindow so it visually sits nicely on top of our marker
+            infoOptions: {
+                pixelOffset: {
+                    width: 0,
+                    height: -35
+                }
+            }
         }
     },
     mounted: function() {
         this.getDestinations();
-        GoogleMapsLoader.load(this.loadMap);
     },
     methods: {
+        // destinationsテーブルの全取得
         getDestinations: function() {
             axios.get('/api/destinations')
             .then((res) => {
                 this.destinations = res.data.data;
+                this.destinations.map(marker => {
+                    marker.position = { lat: parseFloat(marker.lat), lng: parseFloat(marker.lng) }
+                })
+            }).catch(err => {
+                console.log('err reason:', err);
             });
+            console.log('getDestinations')
         },
-        addMarker() {
-            this.markers.forEach(markerInfo => {
-                var contentString =
-                  '<div id="content">' +
-                  '<div id="siteNotice">' +
-                  "</div>" +
-                  '<h1 id="firstHeading" class="firstHeading">Uluru</h1>' +
-                  '<div id="bodyContent">' +
-                  "<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large " +
-                  "sandstone rock formation in the southern part of the " +
-                  "Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) " +
-                  "south west of the nearest large town, Alice Springs; 450&#160;km " +
-                  "(280&#160;mi) by road. Kata Tjuta and Uluru are the two major " +
-                  "features of the Uluru - Kata Tjuta National Park. Uluru is " +
-                  "sacred to the Pitjantjatjara and Yankunytjatjara, the " +
-                  "Aboriginal people of the area. It has many springs, waterholes, " +
-                  "rock caves and ancient paintings. Uluru is listed as a World " +
-                  "Heritage Site.</p>" +
-                  '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">' +
-                  "https://en.wikipedia.org/w/index.php?title=Uluru</a> " +
-                  "(last visited June 22, 2009).</p>" +
-                  "</div>" +
-                  "</div>";
-                  
-                  let marker = new google.maps.Marker({
-                      position: markerInfo.position,
-                      icon:
-                        "https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png",
-                      map: this.map,
-                      // ポップなアニメーションを付与
-                      animation: google.maps.Animation.DROP
-                  });
+        // GmapAutocompleteで選択された場所をcurrentPlaceに格納
+        setPlace: function(place) {
+          this.currentPlace = place;
+        },
+        // マーカーをGmapとdestinationsテーブルへ追加
+        addMarker: function() {
+          if (this.currentPlace) {
+            const marker = {
+              lat: this.currentPlace.geometry.location.lat(),
+              lng: this.currentPlace.geometry.location.lng(),
+              name: this.currentPlace.formatted_address,
+              photo: this.currentPlace.photos[0],
+            };
+            console.log(this.currentPlace)
+            // Gmap関係
+            this.destinations.push({ position: marker });
+            this.places.push(this.currentPlace);
+            this.center = marker;
+            this.currentPlace = null;
+            // destinationsテーブル関係
+            axios.post('/api/destinations',{
+                name: marker.name,
+                lat: marker.lat,
+                lng: marker.lng,
+                photo: '',
+            }).then((res)=>{
+                this.name = '';
+                this.lat = '';
+                this.lng = '';
+                this.photo = '';
+                console.log('addMarker Success!');
             });
+          }
         },
-        loadMap(google) {
-            this.map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: this.lat, lng: this.lng  },
-                zoom: this.zoom,
-            });
-            this.addMarker();
-        },
-        release() {
-          GoogleMapsLoader.release(function() {
-            console.log("No google maps api around");
-          });
-        }
+            toggleInfoWindow: function (marker, idx) {
+
+                this.infoWindowPos = ({
+                        lat : parseFloat(marker.lat),
+                        lng : parseFloat(marker.lng),
+                    }
+                );
+                this.infoContent = this.getInfoWindowContent(marker);
+
+                //check if its the same marker that was selected if yes toggle
+                if (this.currentMidx == idx) {
+                    this.infoWinOpen = !this.infoWinOpen;
+                }
+                //if different marker set infowindow to open and reset current marker index
+                else {
+                    this.infoWinOpen = true;
+                    this.currentMidx = idx;
+                }
+            },
+
+            getInfoWindowContent: function (marker) {
+                return(`<div class="info_window container">
+                          <h3>${marker.name}</h3>
+                          <router-link :to="{ name: 'detail', params: { id: ${marker.id} } }" class="mx-auto btn btn-success">More Info</router-link>
+                         </div>`);
+            },
     }
 }
 </script>
-
-<style>
-#map {
-    width: 700px;
-    height: 400px;
-}
-</style>

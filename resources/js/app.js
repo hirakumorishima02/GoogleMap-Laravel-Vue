@@ -15,11 +15,20 @@ import Detail from './components/Detail.vue';
 import VueRouter from 'vue-router';
 Vue.use(VueRouter);
 const router = new VueRouter({
+    mode: 'history',
     routes:[
         { path:'/', component: Map, name:'map' },
         { path:'/:id', component: Detail, name:'detail' },
     ]
 });
+
+import * as VueGoogleMaps from 'vue2-google-maps'
+Vue.use(VueGoogleMaps, {
+  load: {
+    key: 'AIzaSyCYDBKZ0Hp66gi6wllOzGoE8oVuMUaxUD0',
+    libraries: 'places', 
+  },
+})
 
 Vue.component('navbar', Navbar);
 

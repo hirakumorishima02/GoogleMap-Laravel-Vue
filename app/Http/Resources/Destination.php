@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Http\Resources\Memo AS MemoResource;
 
 class Destination extends JsonResource
 {
@@ -20,6 +21,7 @@ class Destination extends JsonResource
             'lat'=>$this->lat,
             'lng'=>$this->lng,
             'photo'=>$this->photo,
+            'memo' => MemoResource::collection($this->whenLoaded('memo')),
         ];
     }
 }
