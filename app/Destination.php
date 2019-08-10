@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Destination extends Model
 {
-    public function memoToDestination() {
+    public function memos() {
       return $this->hasMany('App\Memo', 'destination_id');
     }
 }

@@ -1847,11 +1847,20 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      destination: null
+      destination: null,
+      content: ''
     };
+  },
+  // memoのcontentが変化した時の処理
+  watch: {
+    content: function content() {
+      this.getDestination();
+    }
   },
   mounted: function mounted() {
     this.getDestination();
@@ -1862,6 +1871,16 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.get('/api/destinations/' + this.$route.params.id).then(function (res) {
         _this.destination = res.data.data;
+      });
+    },
+    addMemo: function addMemo() {
+      var _this2 = this;
+
+      axios.post('/api/memos', {
+        id: this.$route.params.id,
+        content: this.content
+      }).then(function (res) {
+        _this2.content = '';
       });
     }
   }
@@ -1878,6 +1897,10 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
 //
 //
 //
@@ -1941,11 +1964,18 @@ __webpack_require__.r(__webpack_exports__);
           width: 0,
           height: -35
         }
-      }
+      },
+      currentMarker: null
     };
   },
   mounted: function mounted() {
     this.getDestinations();
+  },
+  // currentMarkerのcontentが変化した時の処理
+  watch: {
+    currentMarker: function currentMarker() {
+      this.getDestinations();
+    }
   },
   methods: {
     // destinationsテーブルの全取得
@@ -1966,22 +1996,32 @@ __webpack_require__.r(__webpack_exports__);
       });
       console.log('getDestinations');
     },
+    onDelete: function onDelete(id) {
+      var _this2 = this;
+
+      axios["delete"]('/api/destinations/' + id).then(function () {
+        _this2.$delete(_this2.currentMarker);
+
+        _this2.$delete(_this2.marker);
+      });
+    },
     // GmapAutocompleteで選択された場所をcurrentPlaceに格納
     setPlace: function setPlace(place) {
       this.currentPlace = place;
     },
     // マーカーをGmapとdestinationsテーブルへ追加
     addMarker: function addMarker() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (this.currentPlace) {
         var marker = {
           lat: this.currentPlace.geometry.location.lat(),
           lng: this.currentPlace.geometry.location.lng(),
-          name: this.currentPlace.formatted_address,
+          name: this.currentPlace.name,
           photo: this.currentPlace.photos[0]
         };
-        console.log(this.currentPlace); // Gmap関係
+        this.currentMarker = marker;
+        console.log(this.marker); // Gmap関係
 
         this.destinations.push({
           position: marker
@@ -1996,10 +2036,10 @@ __webpack_require__.r(__webpack_exports__);
           lng: marker.lng,
           photo: ''
         }).then(function (res) {
-          _this2.name = '';
-          _this2.lat = '';
-          _this2.lng = '';
-          _this2.photo = '';
+          _this3.name = '';
+          _this3.lat = '';
+          _this3.lng = '';
+          _this3.photo = '';
           console.log('addMarker Success!');
         });
       }
@@ -2008,19 +2048,26 @@ __webpack_require__.r(__webpack_exports__);
       this.infoWindowPos = {
         lat: parseFloat(marker.lat),
         lng: parseFloat(marker.lng)
-      };
-      this.infoContent = this.getInfoWindowContent(marker); //check if its the same marker that was selected if yes toggle
+      }; // これを追加
+
+      this.currentMarker = marker; // this.infoContent = this.getInfoWindowContent(marker);
+      //check if its the same marker that was selected if yes toggle
 
       if (this.currentMidx == idx) {
         this.infoWinOpen = !this.infoWinOpen;
-      } //if different marker set infowindow to open and reset current marker index
-      else {
-          this.infoWinOpen = true;
-          this.currentMidx = idx;
-        }
+      } else {
+        //if different marker set infowindow to open and reset current marker index
+        this.infoWinOpen = true;
+        this.currentMidx = idx;
+      }
     },
-    getInfoWindowContent: function getInfoWindowContent(marker) {
-      return "<div class=\"info_window container\">\n                          <h3>".concat(marker.name, "</h3>\n                          <router-link :to=\"{ name: 'detail', params: { id: ").concat(marker.id, " } }\" class=\"mx-auto btn btn-success\">More Info</router-link>\n                         </div>");
+    routeToDetail: function routeToDetail() {
+      this.$router.push({
+        name: 'detail',
+        params: {
+          id: this.currentMarker.id
+        }
+      });
     }
   }
 });
@@ -6504,6 +6551,25 @@ exports = module.exports = __webpack_require__(/*! ../../../css-loader/lib/css-b
 
 // module
 exports.push([module.i, "\n.vue-street-view-pano-container {\n  position: relative;\n}\n.vue-street-view-pano-container .vue-street-view-pano {\n  left: 0; right: 0; top: 0; bottom: 0;\n  position: absolute;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&":
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+exports.push([module.i, "@import url(https://fonts.googleapis.com/css?family=Orbitron&display=swap);", ""]);
+
+// module
+exports.push([module.i, "\n.title{\n  font-family: 'Orbitron', sans-serif;\n  font-size: 30px!important;\n  margin-bottom: 0px!important;\n  padding-bottom: 0px!important;\n}\n", ""]);
 
 // exports
 
@@ -37416,6 +37482,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./Navbar.vue?vue&type=style&index=0&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -38266,15 +38362,57 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("div", { staticClass: "card-body" }, [
-      _c("h1", { staticClass: "card-title" }, [
-        _vm._v(_vm._s(_vm.destination.name))
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "card-text" }, [
-        _vm._v(_vm._s(_vm.destination.memo))
-      ])
-    ])
+    _c(
+      "div",
+      { staticClass: "card-body" },
+      [
+        _c("h1", { staticClass: "card-title" }, [
+          _vm._v(_vm._s(_vm.destination.name))
+        ]),
+        _vm._v(" "),
+        _vm._l(_vm.destination.memos, function(item) {
+          return _c("div", { staticClass: "card-text" }, [
+            _vm._v(_vm._s(item.content))
+          ])
+        })
+      ],
+      2
+    ),
+    _vm._v(" "),
+    _c("input", {
+      directives: [
+        {
+          name: "model",
+          rawName: "v-model",
+          value: _vm.content,
+          expression: "content"
+        }
+      ],
+      attrs: { type: "text" },
+      domProps: { value: _vm.content },
+      on: {
+        input: function($event) {
+          if ($event.target.composing) {
+            return
+          }
+          _vm.content = $event.target.value
+        }
+      }
+    }),
+    _vm._v(" "),
+    _c(
+      "button",
+      {
+        attrs: { type: "submit" },
+        on: {
+          click: function($event) {
+            $event.preventDefault()
+            return _vm.addMemo($event)
+          }
+        }
+      },
+      [_vm._v("post")]
+    )
   ])
 }
 var staticRenderFns = []
@@ -38301,17 +38439,12 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c(
     "div",
+    { staticStyle: { "background-color": "#FFF0F5", padding: "0" } },
     [
-      _c(
-        "router-link",
-        {
-          staticClass: "mx-auto btn btn-success",
-          attrs: { to: { name: "detail", params: { id: 1 } } }
-        },
-        [_vm._v("More Info")]
-      ),
-      _vm._v(" "),
-      _c("GmapAutocomplete", { on: { place_changed: _vm.setPlace } }),
+      _c("GmapAutocomplete", {
+        attrs: { size: "50" },
+        on: { place_changed: _vm.setPlace }
+      }),
       _vm._v(" "),
       _c("button", { on: { click: _vm.addMarker } }, [_vm._v("Add")]),
       _vm._v(" "),
@@ -38320,15 +38453,15 @@ var render = function() {
       _c(
         "GmapMap",
         {
-          staticStyle: { width: "100%", height: "400px" },
+          staticStyle: { width: "100%", height: "800px" },
           attrs: {
-            center: { lat: 10, lng: 10 },
-            zoom: 1,
-            "map-type-id": "terrain"
+            center: { lat: 35, lng: 160 },
+            zoom: 1.7,
+            "map-type-id": "roadmap"
           }
         },
         [
-          _vm._l(_vm.destinations, function(marker, index) {
+          _vm._l(_vm.destinations, function(marker, key, index) {
             return _c("GmapMarker", {
               key: index,
               attrs: { position: marker.position, clickable: true },
@@ -38354,7 +38487,44 @@ var render = function() {
                 }
               }
             },
-            [_c("div", { domProps: { innerHTML: _vm._s(_vm.infoContent) } })]
+            [
+              _vm.currentMarker
+                ? _c("div", { staticClass: "info_window container" }, [
+                    _c("h3", [_vm._v(_vm._s(_vm.currentMarker.name))]),
+                    _vm._v(" "),
+                    _c(
+                      "a",
+                      {
+                        staticClass: "mx-auto btn btn-success",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.stopPropagation()
+                            $event.preventDefault()
+                            return _vm.routeToDetail($event)
+                          }
+                        }
+                      },
+                      [_vm._v("More Info")]
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "a",
+                      {
+                        staticClass: "mx-auto btn btn-danger",
+                        attrs: { href: "#" },
+                        on: {
+                          click: function($event) {
+                            $event.preventDefault()
+                            return _vm.onDelete(_vm.currentMarker.id)
+                          }
+                        }
+                      },
+                      [_vm._v("Delete")]
+                    )
+                  ])
+                : _vm._e()
+            ]
           )
         ],
         2
@@ -38385,18 +38555,20 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c(
+    "nav",
+    { staticClass: "navbar", staticStyle: { "background-color": "#FFF0F5" } },
+    [
+      _c("router-link", { attrs: { to: "/" } }, [
+        _c("span", { staticClass: "navbar-brand mb-0 h1 title" }, [
+          _vm._v("GMap + Laravue")
+        ])
+      ])
+    ],
+    1
+  )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("nav", { staticClass: "navbar navbar-light bg-light" }, [
-      _c("span", { staticClass: "navbar-brand mb-0 h1" }, [_vm._v("Map app")])
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -56190,14 +56362,16 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Navbar_vue_vue_type_template_id_6dde423b___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Navbar.vue?vue&type=template&id=6dde423b& */ "./resources/js/components/Navbar.vue?vue&type=template&id=6dde423b&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Navbar.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
 
 var script = {}
 
 
+
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
   script,
   _Navbar_vue_vue_type_template_id_6dde423b___WEBPACK_IMPORTED_MODULE_0__["render"],
   _Navbar_vue_vue_type_template_id_6dde423b___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -56212,6 +56386,22 @@ var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_
 if (false) { var api; }
 component.options.__file = "resources/js/components/Navbar.vue"
 /* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&":
+/*!*****************************************************************************!*\
+  !*** ./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css& ***!
+  \*****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./Navbar.vue?vue&type=style&index=0&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/Navbar.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Navbar_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 

@@ -1,4 +1,4 @@
- <?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -18,7 +18,7 @@ class MemoController extends Controller
     public function store(Request $request)
     {
         $memo = new Memo;
-        $memo->destination_id = $request->; // destination_idをどのように呼び出すか
+        $memo->destination_id = $request->input('id',''); // destination_idをどのように呼び出すか
         $memo->content = $request->input('content','');
         $memo->save();
     }
@@ -31,7 +31,7 @@ class MemoController extends Controller
      */
     public function show(Memo $memo)
     {
-        return new MemoResource(;// destination_idをどのように呼び出すか
+        return new MemoResource($memo);// destination_idをどのように呼び出すか
     }
 
     /**

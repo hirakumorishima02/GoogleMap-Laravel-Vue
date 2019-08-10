@@ -21,7 +21,8 @@ class Destination extends JsonResource
             'lat'=>$this->lat,
             'lng'=>$this->lng,
             'photo'=>$this->photo,
-            'memo' => MemoResource::collection($this->whenLoaded('memo')),
+            'memos' => MemoResource::collection($this->memos),
+            // 'memos' => 'test',
         ];
     }
 }

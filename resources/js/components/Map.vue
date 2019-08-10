@@ -1,22 +1,22 @@
 <template>
-    <div>
-        <router-link :to="{ name: 'detail', params: { id: 1 } }" class="mx-auto btn btn-success">More Info</router-link>
+    <div style='background-color:#FFF0F5;padding:0;'>
         <GmapAutocomplete
-          @place_changed="setPlace">
+          @place_changed="setPlace"
+          size='50'
+          >
         </GmapAutocomplete>
         <!--<input type='text' v-model='name' placeholder='地名'>-->
-        
         <button @click="addMarker">Add</button>
       <br/>
         <GmapMap
-          :center="{lat:10, lng:10}"
-          :zoom="1"
-          map-type-id="terrain"
-          style="width:100%;  height: 400px;"
+          :center="{lat:35, lng:160}"
+          :zoom="1.7"
+          map-type-id="roadmap"
+          style="width:100%;  height: 800px;"
         >
             <GmapMarker
                 :key="index"
-                v-for="(marker, index) in destinations"
+                v-for="(marker, key , index) in destinations"
                 :position="marker.position"
                 :clickable="true"
                 @click="toggleInfoWindow(marker, marker.id)"
@@ -27,7 +27,11 @@
                 :opened="infoWinOpen"
                 @closeclick="infoWinOpen=false"
             >
-                <div v-html="infoContent"></div>
+            <div class="info_window container" v-if="currentMarker">
+              <h3>{{currentMarker.name}}</h3>
+              <a href="#" class="mx-auto btn btn-success" @click.stop.prevent="routeToDetail">More Info</a>
+              <a href="#" class="mx-auto btn btn-danger" @click.prevent="onDelete(currentMarker.id)">Delete</a>
+            </div>
             </gmap-info-window>
         </GmapMap>
     </div>
@@ -61,11 +65,18 @@ export default{
                     width: 0,
                     height: -35
                 }
-            }
+            },
+            currentMarker: null
         }
     },
     mounted: function() {
         this.getDestinations();
+    },
+    // currentMarkerのcontentが変化した時の処理
+    watch: {
+        currentMarker: function() {
+        this.getDestinations();
+        }
     },
     methods: {
         // destinationsテーブルの全取得
@@ -81,6 +92,13 @@ export default{
             });
             console.log('getDestinations')
         },
+        onDelete: function(id){
+            axios.delete('/api/destinations/' + id)
+            .then(() => {
+                this.$delete(this.currentMarker);
+                this.$delete(this.marker);
+            })
+        },
         // GmapAutocompleteで選択された場所をcurrentPlaceに格納
         setPlace: function(place) {
           this.currentPlace = place;
@@ -91,10 +109,11 @@ export default{
             const marker = {
               lat: this.currentPlace.geometry.location.lat(),
               lng: this.currentPlace.geometry.location.lng(),
-              name: this.currentPlace.formatted_address,
+              name: this.currentPlace.name,
               photo: this.currentPlace.photos[0],
             };
-            console.log(this.currentPlace)
+            this.currentMarker = marker;
+            console.log(this.marker)
             // Gmap関係
             this.destinations.push({ position: marker });
             this.places.push(this.currentPlace);
@@ -115,32 +134,31 @@ export default{
             });
           }
         },
-            toggleInfoWindow: function (marker, idx) {
-
-                this.infoWindowPos = ({
-                        lat : parseFloat(marker.lat),
-                        lng : parseFloat(marker.lng),
-                    }
-                );
-                this.infoContent = this.getInfoWindowContent(marker);
-
-                //check if its the same marker that was selected if yes toggle
-                if (this.currentMidx == idx) {
-                    this.infoWinOpen = !this.infoWinOpen;
-                }
-                //if different marker set infowindow to open and reset current marker index
-                else {
-                    this.infoWinOpen = true;
-                    this.currentMidx = idx;
-                }
-            },
-
-            getInfoWindowContent: function (marker) {
-                return(`<div class="info_window container">
-                          <h3>${marker.name}</h3>
-                          <router-link :to="{ name: 'detail', params: { id: ${marker.id} } }" class="mx-auto btn btn-success">More Info</router-link>
-                         </div>`);
-            },
+    toggleInfoWindow: function(marker, idx) {
+      this.infoWindowPos = {
+        lat: parseFloat(marker.lat),
+        lng: parseFloat(marker.lng)
+      };
+       // これを追加
+      this.currentMarker = marker;
+      // this.infoContent = this.getInfoWindowContent(marker);
+       //check if its the same marker that was selected if yes toggle
+      if (this.currentMidx == idx) {
+        this.infoWinOpen = !this.infoWinOpen;
+      } else {
+        //if different marker set infowindow to open and reset current marker index
+        this.infoWinOpen = true;
+        this.currentMidx = idx;
+      }
+    },
+        routeToDetail: function() {
+          this.$router.push({
+            name: 'detail',
+            params: {
+              id: this.currentMarker.id
+            }
+          });
+        }
     }
 }
 </script>
