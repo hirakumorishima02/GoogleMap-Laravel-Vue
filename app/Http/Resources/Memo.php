@@ -18,7 +18,7 @@ class Memo extends JsonResource
             'id'=>$this->id,
             'destination_id'=>$this->destination_id,
             'content'=>$this->content,
-            // 'date'=>$this->created_at->format('Y-m-d H:i:s'),
+            'date'=>$this->created_at->format('Y-m-d H:i:s'),
         ];
     }
 }

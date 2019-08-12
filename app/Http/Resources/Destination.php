@@ -21,8 +21,7 @@ class Destination extends JsonResource
             'lat'=>$this->lat,
             'lng'=>$this->lng,
             'photo'=>$this->photo,
-            'memos' => MemoResource::collection($this->memos),
-            // 'memos' => 'test',
+            'memos' => MemoResource::collection($this->memos), //コレで該当destination_idのレコードが呼べる
         ];
     }
 }

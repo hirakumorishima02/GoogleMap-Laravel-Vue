@@ -1882,6 +1882,13 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (res) {
         _this2.content = '';
       });
+    },
+    onDelete: function onDelete() {
+      var _this3 = this;
+
+      axios["delete"]('/api/memos/' + memo.id).then(function () {
+        _this3.$delete(_this3.destination.memos);
+      });
     }
   }
 });
@@ -38370,9 +38377,9 @@ var render = function() {
           _vm._v(_vm._s(_vm.destination.name))
         ]),
         _vm._v(" "),
-        _vm._l(_vm.destination.memos, function(item) {
+        _vm._l(_vm.destination.memos, function(memo) {
           return _c("div", { staticClass: "card-text" }, [
-            _vm._v(_vm._s(item.content))
+            _vm._v(_vm._s(memo.content) + "[" + _vm._s(memo.date) + "]")
           ])
         })
       ],

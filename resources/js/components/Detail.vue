@@ -2,7 +2,7 @@
     <div>
         <div class="card-body">
             <h1 class="card-title">{{destination.name}}</h1>
-            <div class="card-text" v-for='item in destination.memos'>{{item.content}}</div>
+            <div class="card-text" v-for='memo in destination.memos'>{{memo.content}}[{{memo.date}}]</div>
         </div>
         <input type='text' v-model='content'>
         <button type='submit' @click.prevent='addMemo'>post</button>
@@ -40,6 +40,12 @@ export default {
             })
             .then((res) => {
                 this.content = '';
+            })
+        },
+        onDelete: function() {
+            axios.delete('/api/memos/' + memo.id)
+            .then(() => {
+                this.$delete(this.destination.memos);
             })
         }
     }

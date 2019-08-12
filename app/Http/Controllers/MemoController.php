@@ -31,7 +31,7 @@ class MemoController extends Controller
      */
     public function show(Memo $memo)
     {
-        return new MemoResource($memo);// destination_idをどのように呼び出すか
+        return new MemoResource($memo);
     }
 
     /**

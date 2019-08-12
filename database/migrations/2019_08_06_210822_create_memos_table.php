@@ -22,7 +22,8 @@ class CreateMemosTable extends Migration
             
             $table->foreign('destination_id')
                   ->references('id')
-                  ->on('destinations');
+                  ->on('destinations')
+                  ->onDelete('cascade');
         });
     }
 
